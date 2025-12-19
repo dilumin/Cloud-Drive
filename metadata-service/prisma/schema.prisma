@@ -1,0 +1,31 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum NodeType {
+  FOLDER
+  FILE
+}
+
+model Node {
+  id         BigInt   @id @default(autoincrement())
+  ownerId    BigInt   @map("owner_id")
+  type       NodeType
+  parentId   BigInt?  @map("parent_id")
+  parent     Node?    @relation("NodeToChildren", fields: [parentId], references: [id])
+  children   Node[]   @relation("NodeToChildren")
+  name       String
+  isRoot     Boolean  @default(false) @map("is_root")
+  createdAt  DateTime @default(now()) @map("created_at")
+  updatedAt  DateTime @updatedAt @map("updated_at")
+  deletedAt  DateTime? @map("deleted_at")
+  rowVersion BigInt   @default(0) @map("row_version")
+
+
+  @@map("nodes")
+}

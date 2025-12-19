@@ -1,0 +1,56 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum UploadStatus {
+  INITIATED
+  UPLOADING
+  FINALIZING
+  COMPLETED
+  ABORTED
+}
+
+model UploadSession {
+  id          BigInt       @id @default(autoincrement())
+  ownerId     BigInt       @map("owner_id")
+  fileNodeId  BigInt       @map("file_node_id")
+  versionNo   Int          @map("version_no")
+  status      UploadStatus @default(UPLOADING)
+  bucket      String
+  storageKey  String       @map("storage_key")
+  uploadId    String       @map("upload_id")
+  partSize    Int          @map("part_size")
+  totalSize   BigInt       @map("total_size")
+  mimeType    String?      @map("mime_type")
+  expiresAt   DateTime     @map("expires_at")
+  completedAt DateTime?    @map("completed_at")
+  abortedAt   DateTime?    @map("aborted_at")
+  createdAt   DateTime     @default(now()) @map("created_at")
+  updatedAt   DateTime     @updatedAt @map("updated_at")
+
+  @@index([ownerId, fileNodeId], map: "idx_sessions_owner_file")
+  @@unique([ownerId, fileNodeId, versionNo], map: "uniq_session_owner_file_version")
+  @@map("upload_sessions")
+}
+
+model FileVersion {
+  id         BigInt   @id @default(autoincrement())
+  ownerId    BigInt   @map("owner_id")
+  fileNodeId BigInt   @map("file_node_id")
+  versionNo  Int      @map("version_no")
+  bucket     String
+  storageKey String   @map("storage_key")
+  sizeBytes  BigInt   @map("size_bytes")
+  checksum   String?
+  mimeType   String?  @map("mime_type")
+  createdAt  DateTime @default(now()) @map("created_at")
+
+  @@unique([ownerId, fileNodeId, versionNo], map: "uniq_version_owner_file_versionno")
+  @@index([ownerId, fileNodeId, createdAt], map: "idx_versions_owner_file_created")
+  @@map("file_versions")
+}

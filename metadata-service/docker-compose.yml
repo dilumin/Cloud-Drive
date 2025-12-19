@@ -1,0 +1,26 @@
+version: "3.9"
+services:
+  postgres:
+    image: postgres:16
+    environment:
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_USER: postgres
+      POSTGRES_DB: metadata
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata_metadata:/var/lib/postgresql/data
+
+  metadata-service:
+    build: .
+    environment:
+      PORT: 3001
+      NODE_ENV: development
+      DATABASE_URL: postgresql://postgres:postgres@postgres:5432/metadata?schema=public
+    ports:
+      - "3001:3001"
+    depends_on:
+      - postgres
+    command: sh -c "npm run prisma:deploy && node dist/main.js"
+volumes:
+  pgdata_metadata:
