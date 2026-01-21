@@ -1,6 +1,5 @@
 # Cloud Drive BFF (Express, JavaScript)
 
-A production-style Backend-for-Frontend for the Cloud Drive platform.
 
 ## What it does
 - **Authentication**: register/login, JWT access token + rotating refresh tokens (stored server-side)
